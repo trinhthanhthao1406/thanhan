@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Awareness Against QR Code & Malicious Link Scams</title>
+<style>
+:root{--bg:#070b14;--panel:#0f1626;--text:#e8ecf5;--mute:#8d99b3;--red:#ff3b3b;--amber:#ffb020;--green:#2fd67b;--gold:#ffd24a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:"Segoe UI",Roboto,Arial,sans-serif}
+body{display:flex;justify-content:center}
+.page{display:none;width:100%;max-width:460px;min-height:100vh;padding:24px 18px;position:relative}
+.page.on{display:block}
+.card{background:var(--panel);border:1px solid #24304a;border-radius:16px;padding:18px;margin:14px 0}
+h1{font-size:22px;margin:8px 0 4px}
+p{line-height:1.5;color:var(--mute);margin:6px 0}
+button{width:100%;padding:15px;border-radius:12px;border:0;font-size:16px;font-weight:700;cursor:pointer;background:var(--green);color:#04210f;margin-top:10px}
+button.ghost{background:#17213a;color:var(--text);border:1px solid #2b3a5e}
+.row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #1d2842;font-size:15px}
+.row:last-child{border:0}
+.badge{display:inline-block;background:#12351f;color:var(--green);border:1px solid #1f6b3f;padding:3px 10px;border-radius:999px;font-size:12px}
+.timer{font-variant-numeric:tabular-nums;color:var(--amber);font-weight:700}
+
+/* PAGE 2: hack alarm */
+#p2{background:#000;color:#39ff6a;font-family:"Courier New",monospace;overflow:hidden}
+#p2 p{color:#39ff6a}
+#p2.on{animation:shake .25s infinite}
+@keyframes shake{0%{transform:translate(0,0)}25%{transform:translate(-3px,2px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,-3px)}100%{transform:translate(2px,3px)}}
+.flash{position:fixed;inset:0;background:var(--red);opacity:0;pointer-events:none;animation:flash 1s steps(2) infinite;z-index:5;mix-blend-mode:multiply}
+@keyframes flash{50%{opacity:.35}}
+#noise{position:fixed;inset:0;width:100%;height:100%;opacity:.28;pointer-events:none;z-index:4}
+.scan{position:fixed;left:0;right:0;height:80px;top:-80px;background:linear-gradient(transparent,rgba(57,255,106,.18),transparent);animation:scan 2.4s linear infinite;z-index:6;pointer-events:none}
+@keyframes scan{to{top:110%}}
+.glitch{font-size:30px;font-weight:900;color:#ff3b3b;text-align:center;margin:22px 0 6px;position:relative;letter-spacing:1px}
+.glitch::before,.glitch::after{content:attr(data-t);position:absolute;left:0;right:0}
+.glitch::before{color:#0ff;animation:g1 .6s infinite steps(2);clip-path:inset(0 0 55% 0)}
+.glitch::after{color:#f0f;animation:g2 .5s infinite steps(2);clip-path:inset(55% 0 0 0)}
+@keyframes g1{0%{transform:translate(-4px,0)}50%{transform:translate(4px,0)}100%{transform:translate(-2px,0)}}
+@keyframes g2{0%{transform:translate(4px,0)}50%{transform:translate(-4px,0)}100%{transform:translate(2px,0)}}
+.lost{border:2px solid var(--red);background:#1a0000;color:#ff6b6b;padding:14px;text-align:center;font-weight:700;margin:14px 0;animation:blink .7s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+#log{height:240px;overflow:hidden;font-size:13px;line-height:1.5;border:1px solid #145c2a;padding:10px;background:rgba(0,20,0,.6)}
+.bar{height:12px;border:1px solid #39ff6a;margin-top:12px}
+.bar i{display:block;height:100%;width:0;background:#39ff6a}
+
+/* PAGE 3: reveal */
+.wrap3{border:1px solid #24304a;border-radius:26px;padding:20px;background:#050a18}
+.pill{display:block;width:max-content;margin:0 auto;padding:10px 26px;border:1px solid #7a1f1f;background:#2a0b0b;color:#ff5a5a;border-radius:999px;font-weight:700}
+.big{color:var(--red);font-size:24px;font-weight:900;text-align:center;margin:20px 0}
+.loan{border:2px solid #b02a2a;border-radius:22px;padding:16px;background:#0d1428}
+.loan .v{font-weight:700}.loan .r{color:var(--red)}.loan .g{color:var(--gold);font-size:20px;font-weight:900}
+.warn{border:2px solid var(--amber);border-radius:22px;padding:16px;margin-top:18px;background:#1b1006}
+.warn h2{margin:0 0 10px;color:var(--gold);font-size:17px}
+.warn p{color:var(--text)}
+.note{background:#2a1708;border:1px solid #5b3a12;border-radius:10px;padding:10px;color:var(--gold);font-size:14px;margin-top:12px}
+@media (prefers-reduced-motion:reduce){#p2.on,.flash,.scan,.glitch::before,.glitch::after,.lost{animation:none}}
+</style>
+</head>
+<body>
+
+<!-- PAGE 1: lure -->
+<section class="page on" id="p1">
+  <div style="min-height:80vh;display:flex;align-items:center">
+    <button id="go" style="padding:22px;font-size:22px;letter-spacing:2px">PRESS NOW</button>
+  </div>
+</section>
+
+<!-- PAGE 2: hack alarm -->
+<section class="page" id="p2">
+  <div class="flash"></div><div class="scan"></div><canvas id="noise"></canvas>
+  <div class="glitch" data-t="⚠ SYSTEM ALERT ⚠">⚠ SYSTEM ALERT ⚠</div>
+  <p style="text-align:center">Unauthorized remote access detected</p>
+  <div class="lost" id="lost">SERVER CONNECTION LOST... RECONNECTING</div>
+  <div id="log"></div>
+  <div class="bar"><i id="bar"></i></div>
+</section>
+
+<!-- PAGE 3: reveal -->
+<section class="page" id="p3">
+  <div class="wrap3">
+    <span class="pill">CRITICAL WARNING</span>
+    <div class="big">⚠ LOAN AGREEMENT CONFIRMED!</div>
+    <div class="loan">
+      <div class="row"><span>Contract ID: <b>#LOAN-99281-US</b></span><span class="badge" style="background:#3a1010;color:#ff6b6b;border-color:#8a2a2a">ACTIVATED</span></div>
+      <div class="row"><span>Principal Loan Amount:</span><span class="v">$25,000.00 USD</span></div>
+      <div class="row"><span>Contract Duration:</span><span class="r">1 Year (Non-Cancellable)</span></div>
+      <div class="row"><span>Applied Interest Rate:</span><span class="r">198% APR (Daily Compounded)</span></div>
+      <div class="row"><b>Total Payable Amount:</b><span class="g">$74,500.00 USD</span></div>
+    </div>
+    <div class="warn">
+      <h2>WARNING: YOU HAVE BEEN TRICKED!</h2>
+      <p>In real life, a single careless <b>click or QR code scan</b> can silently compromise your personal identity, grant remote device access, or drain your bank accounts.</p>
+      <div class="note">Presentation Info: Topic: "Awareness Against QR Code & Malicious Link Scams". Everything in this demo is fake. No data is collected or sent.</div>
+    </div>
+    <button class="ghost" id="again">↻ Run test again for someone else</button>
+  </div>
+</section>
+
+<script>
+const $=id=>document.getElementById(id);
+function show(n){document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));$(n).classList.add('on');window.scrollTo(0,0)}
+
+// countdown on page 1
+let ti=null;
+
+// noise
+const cv=$('noise'),cx=cv.getContext('2d');let nz;
+function drawNoise(){cv.width=120;cv.height=220;const d=cx.createImageData(120,220);
+for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255;d.data[i]=d.data[i+1]=d.data[i+2]=v;d.data[i+3]=255}cx.putImageData(d,0,0)}
+
+const lines=["[+] Initializing remote shell...","[+] Bypassing device lock...","[!] Reading saved contacts...","[!] Scanning installed banking apps...","[+] Copying SMS / OTP messages...","[!] Extracting browser passwords...","[+] Uploading data to 185.xx.xx.xx...","[!] Connection lost. Retrying...","[+] Enabling auto-debit permissions...","[+] Transfer complete."];
+function runHack(){
+  show('p2');const log=$('log'),bar=$('bar');log.innerHTML='';let i=0,p=0;
+  nz=setInterval(drawNoise,80);
+  const lt=setInterval(()=>{$('lost').textContent=Math.random()>.5?'SERVER CONNECTION LOST... RECONNECTING':'SIGNAL LOST // 0xDEAD'+Math.floor(Math.random()*999)},900);
+  const it=setInterval(()=>{
+    log.innerHTML+=(lines[i%lines.length])+'<br>';log.scrollTop=log.scrollHeight;i++;
+    p=Math.min(100,p+9);bar.style.width=p+'%';
+    if(i>=11){clearInterval(it);clearInterval(lt);clearInterval(nz);setTimeout(()=>show('p3'),900)}
+  },480);
+}
+$('go').onclick=()=>{clearInterval(ti);runHack()};
+$('again').onclick=()=>location.reload();
+</script>
+</body>
+</html>
